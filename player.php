@@ -2,11 +2,25 @@
 
 <!-- MEDIA -->
 
+<!-- CREATE TABLE `media` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `file` varchar(45) DEFAULT NULL,
+        `description` varchar(165) DEFAULT NULL,
+        PRIMARY KEY (`id`)
+    ) 
+-->
 
 <!-- MEDIA_PLAYLIST -->
 
+<!-- CREATE TABLE `media_playlist` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `name` varchar(45) DEFAULT NULL,
+        PRIMARY KEY (`id`)
+    ) 
+-->
 
 <!-- MEDIA_PLAYLIST_FILES -->
+
 <!-- CREATE TABLE `media-playlist_files` (
         `media` int(11) NOT NULL,
         `playlist` int(11) NOT NULL
@@ -25,6 +39,7 @@
         return $conn;
     }
 
+// Don't write this straight away
 // During file upload. This function randomises the files name 
     function get_random_name($num=6) {
         $characters = 'abcdefghijklmnopqrstuvwxyz123456789';
@@ -52,6 +67,7 @@
         $query->execute([$name]);
     }
 
+// Saves song into specific playlist E.G checkbox song and add to playlist
     function save_to_playlist($mediaId, $playlistId) {
         $conn = get_connection();
         $sql = "INSERT INTO media_playlist_files(`media`, `playlist`) VALUES (?,?)";
@@ -59,6 +75,7 @@
         $query->execute([$mediaId, $playlistId]);
     }
 
+// Gets songs from database
     function get_media() {
         $pl = isset($_GET['playlist']) ? $_GET['playlist'] : 'all';
         $results = [];
@@ -82,6 +99,7 @@
         return $results;
     }
 
+// Gets playlists from DB and you use this to select which playlist you want
     function get_playlists() {
         $results = [];
         try {
@@ -93,6 +111,7 @@
         return $results;
     }
 
+// Used for the next button. Next button still broke in the JS part (i think)
     function get_play_queue() {
         $mediaFiles = get_media();
         $queue = [];
@@ -151,7 +170,6 @@
         }
 
     }
-
 
 ?>
 
@@ -228,6 +246,7 @@
 
         </select>
             <button type="submit" name="add-to-playlist">Add to Playlist!</button>
+            <button type="submit" name="delete-media">Delete media</button>
             <!-- A foreach that loops through the database and returns all audio files in media able  -->
             <ul>
                 <?php $count=0; foreach(get_media() as $media): ?>
@@ -243,68 +262,8 @@
     
 
 </body>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF" crossorigin="anonymous"></script>
-<script>
-    // plays audio + Links to for each above ^^
-    $(document).ready(function() {
-
-        var audio = null;
-        var currentFile = null;
-        var playlist = <?php echo get_play_queue(); ?>;
-        var currentCount = 0;
-
-        $('.play-media').on('click', function() {
-            var el = $(this);
-            var filename = el.attr('data-file');
-            var count = el.attr('data-file')
-            currentCount = parseInt(count);
-            
-            if(audio && currentFile === filename) {
-                audio.currentFile = 0;
-                audio.play();
-            }else {
-                if(audio) {
-                    audio.pause();
-                }
-                audio = new Audio(filename);
-                currentFile = filename;
-                audio.play();
-            }
-            return false;
-
-        });
-
-        // Pauses audio + Selects audio button below the form
-        $('#pause-button').on('click', function() {
-            if(audio) {
-                audio.pause();
-            }
-            return false;
-        });
-
-        // Plays audio from the start of the track
-        $('#from-start').on('click', function() {
-            if(audio) {
-                audio.currentTime = 0;
-                audio.play();
-            }
-            return false;
-        })
-
-        // Skips to the next song in the playlist (BROKEN)
-        $('#next-button').on('click', function() {
-            if(currentCount < playlist.length) {
-                if(audio) {
-                    audio.pause();
-                }
-                var index = currentCount +1;
-                audio = new Audio(playlist[index]);
-                audio.play();
-                currentCount++;
-            }
-            return false;
-        })
-
-    });
+<script src="styles.js">
+    var playlist = <?php echo get_play_queue(); ?>;
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF" crossorigin="anonymous"></script>
 </html>
